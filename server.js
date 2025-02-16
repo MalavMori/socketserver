@@ -18,7 +18,7 @@ const io = new Server(server,{
 io.on("connection",(socket)=>{
     console.log("user: "+socket.id)
     socket.on("message",(data)=>{
-        console.log(data)
+        socket.broadcast.emit("recevi_message",data)
     })
 })
 
