@@ -1,27 +1,25 @@
-const express = require("express")
-const http = require("http")
-const { Server } = require("socket.io")
-const app = express()
+const WebSocket = require('ws');
 
-const cors = require("cors")
-app.use(cors())
+const wss = new WebSocket.Server({ port: 80 });
 
-const server = http.createServer(app)
+wss.on('connection', (ws) => {
+  console.log('A client connected');
+  ws.send('Hello from WebSocket server!');
 
-const io = new Server(server,{
-    cors:{
-        origin:"*",
-        methods:["GET","POST"]
-    }
-})
+  ws.on('message', (message) => {
+    console.log(message.toString());
+    wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(message.toString());
+        }
+      });
+  });
 
-io.on("connection",(socket)=>{
-    console.log("user: "+socket.id)
-    socket.on("message",(data)=>{
-        socket.broadcast.emit("recevi_message",data)
-    })
-})
+  ws.on('close', () => {
+    console.log('Client disconnected');
+  });
+});
 
-server.listen(3001,()=>{
-    console.log("Server on 3001")
-})
+
+
+console.log('WebSocket server is running on port 80');
